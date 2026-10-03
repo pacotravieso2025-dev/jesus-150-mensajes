@@ -51,7 +51,7 @@ main{max-width:1180px;margin:auto;padding:24px 18px 50px}
 .reader{display:none;max-width:820px;margin:auto}
 .reader.open{display:block}
 .list.hidden{display:none}
-.reader-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.back{border:0;background:transparent;color:var(--accent);padding:5px 0;font-weight:700}.share-btn{border:0;background:#25D366;color:white;border-radius:11px;padding:9px 13px;font-weight:750;white-space:nowrap}.share-btn:hover{filter:brightness(.95)}
+.back{border:0;background:transparent;color:var(--accent);padding:5px 0;margin-bottom:10px;font-weight:700}
 .article{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:clamp(22px,5vw,44px);box-shadow:var(--shadow)}
 .article .number{color:var(--accent2);font-size:13px;font-weight:800;letter-spacing:.1em}
 .article h2{font-family:Georgia,serif;font-size:clamp(30px,6vw,48px);line-height:1.08;margin:10px 0 22px}
@@ -86,7 +86,7 @@ main{max-width:1180px;margin:auto;padding:24px 18px 50px}
 </section>
 
 <section id="readerView" class="reader">
-  <div class="reader-top"><button class="back" id="backBtn">← Volver a los 150 mensajes</button><button class="share-btn" id="shareBtn">💬 Compartir por WhatsApp</button></div>
+  <button class="back" id="backBtn">← Volver a los 150 mensajes</button>
   <article id="article" class="article"></article>
   <div class="nav"><button id="prevBtn">← Anterior</button><button id="nextBtn">Siguiente →</button></div>
 </section>
@@ -134,24 +134,13 @@ function openMessage(id){
   $('prevBtn').disabled=id===1; $('nextBtn').disabled=id===150;
   window.scrollTo({top:0,behavior:'smooth'});
 }
-function shareWhatsApp(){
-  if(!state.current)return;
-  const m=messages.find(x=>x.id===state.current);
-  const body=m.paras.map(strip).join('\n\n');
-  const appUrl=new URL(window.location.href); appUrl.hash='mensaje-'+m.id;
-  const text=`${m.title}\n\n${body}\n\nLee el mensaje completo en la aplicación: ${appUrl.toString()}`;
-  const url='https://wa.me/?text='+encodeURIComponent(text);
-  window.open(url,'_blank','noopener,noreferrer');
-}
 function closeReader(){state.current=null;$('readerView').classList.remove('open');$('listView').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});}
 $('search').addEventListener('input',e=>{state.query=e.target.value;renderList();});
 $('filter').addEventListener('change',e=>{state.filter=e.target.value;renderList();});
-$('backBtn').onclick=closeReader;$('homeBtn').onclick=closeReader;$('shareBtn').onclick=shareWhatsApp;
+$('backBtn').onclick=closeReader;$('homeBtn').onclick=closeReader;
 $('prevBtn').onclick=()=>state.current&&openMessage(state.current-1);
 $('nextBtn').onclick=()=>state.current&&openMessage(state.current+1);
 document.addEventListener('keydown',e=>{if(state.current===null)return;if(e.key==='ArrowLeft'&&state.current>1)openMessage(state.current-1);if(e.key==='ArrowRight'&&state.current<150)openMessage(state.current+1);if(e.key==='Escape')closeReader();});
-updateFavStat();renderList();
-const deep=window.location.hash.match(/^#mensaje-(\d+)$/); if(deep){ const id=Number(deep[1]); if(messages.some(m=>m.id===id)) openMessage(id); }
-if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+updateFavStat();renderList(); if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body></html>
